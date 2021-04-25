@@ -172,9 +172,35 @@ export const asyncRoutes = [
         meta: {
           title: '专栏',
         }
-      },
-    ]
+      }, {
+        hidden: true,
+        path: "column_detail",
+        name: "ColumnDetail",
+        component: () =>
+            import ('@/views/course/column_detail'),
+        meta: {
+            title: "专栏详情"
+        }
+    }]
   },
+  {
+    path: "/user",
+    component: Layout,
+    meta: {
+        title: "用户",
+        icon: "user"
+    },
+    redirect: "/user",
+    children: [{
+        path: "user",
+        name: "User",
+        component: () =>
+            import ('@/views/user/index'),
+        meta: {
+            title: "用户"
+        }
+    }]
+},
   
   // {
   //   path: '/permission',

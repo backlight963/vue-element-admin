@@ -16,10 +16,11 @@
         </el-option>
       </el-select>
       <el-input
-        v-model="input"
         style="width: 200px; margin-right: 5px"
         placeholder="标题"
-      ></el-input>
+        v-model="tableDataQuery.title"
+       @keyup.enter.native="handleFilter" 
+      />
       <el-button type="primary" icon="el-icon-search" @click="handleFilter"
         >搜索</el-button
       >
@@ -187,24 +188,7 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog :visible.sync="dialogVisible">
-      <el-table
-        :data="pvData"
-        border
-        fit
-        highlight-current-row
-        style="width: 100%"
-      >
-        <el-table-column prop="key" label="Channel" />
-        <el-table-column prop="pv" label="Pv" />
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="dialogVisible = false"
-          >Confirm</el-button
-        >
-      </span>
-    </el-dialog>
-
+    <!-- 分页 -->
     <div class="block" style="margin-left: 50px">
       <el-pagination
         @size-change="handleSizeChange"
@@ -240,8 +224,9 @@ export default {
       value: "",
       radio: "1",
       niradio: "2",
+      total:0,
       num: 0,
-      currentPage1: 5,
+      currentPage1: 1,
       tableData: null,
       tableDataLoading: true,
       tableDataQuery: {
@@ -271,7 +256,6 @@ export default {
         status: "published",
       },
       dialogFormVisible: false,
-      pvData: [],
       dialogStatus: "",
       textMap: {
         update: "编辑",
@@ -320,12 +304,26 @@ export default {
     this.fetchData();
   },
   methods: {
-    async fetchData() {
-      const { data } = await fetchList();
-      this.tableData = data.items;
+    // async fetchData() {
+    //   const { data } = await fetchList();
+    //   this.tableData =data.items;
+    // },
+    fetchData(){
+        this.tableDataLoading = true
+        fetchList(this. tableDataQuery).then(response => {
+                    console.log(response)
+                    this.tableData = response.data.items
+                    this.total = response.data.total
+
+                    // Just to simulate the time of the request
+                    setTimeout(() => {
+                        this.tableDataLoading = false
+                    }, 1.5 * 1000)
+                })
     },
     handleFilter() {
-      this.tableData();
+      this. tableDataQuery.page=1
+      this.fetchData();
     },
     handleModifyStatus(row, status) {
       this.$message({
@@ -342,9 +340,9 @@ export default {
     },
     sortByID(order) {
       if (order === "ascending") {
-        this.listQuery.sort = "+id";
+        this. tableDataQuery.sort = "+id";
       } else {
-        this.listQuery.sort = "-id";
+        this. tableDataQuery.sort = "-id";
       }
       this.handleFilter();
     },
@@ -456,6 +454,20 @@ export default {
       } else if (value === 1) {
         return "success";
       }
+    },
+    getSortClass: function (key) {
+      const sort = this. tableDataQuery.sort;
+      return sort === `+${key}` ? "ascending" : "descending";
+    },
+    handleUploadRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+    },
+    handleUploadSuccess(response, file, fileList) {
+      console.log(response, file, fileList);
     },
   },
 };
